@@ -1,0 +1,463 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Sprocket's Code Quest</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;700;800&display=swap">
+<style>
+/* Layout: one playful "comic strip" column. Sprocket (the robot) talks in a bubble at the top of every chapter; the playfield sits beneath it; the program the child builds sits beneath that. Chapters are tabs so one is on screen at a time. */
+:root{
+  --bg:#eef7f3; --panel:#ffffff; --ink:#1f2d2a; --muted:#5d716b;
+  --sky:#bfe9dc; --grass:#8fd3a5; --line:#cfe3da;
+  --sun:#ffcf4a; --sun-ink:#5a3f00; --coral:#ff7a59; --berry:#8a5cf6; --sea:#2aa0a3;
+  --ok:#2f9e5f; --bad:#d9534f;
+  --display:'Fredoka','Trebuchet MS',sans-serif; --body:'Nunito','Segoe UI',sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#12201c; --panel:#1b2c27; --ink:#eef7f3; --muted:#9fb6ae;
+  --sky:#1f4a44; --grass:#2f6b4c; --line:#2d443d;
+  --sun:#ffd25c; --sun-ink:#3d2a00; --coral:#ff8a6a; --berry:#a688ff; --sea:#4cc4c7;
+  --ok:#4fc27f; --bad:#f07772; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#12201c; --panel:#1b2c27; --ink:#eef7f3; --muted:#9fb6ae;
+  --sky:#1f4a44; --grass:#2f6b4c; --line:#2d443d;
+  --sun:#ffd25c; --sun-ink:#3d2a00; --coral:#ff8a6a; --berry:#a688ff; --sea:#4cc4c7;
+  --ok:#4fc27f; --bad:#f07772; color-scheme:dark }
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px 40px}
+.wrap{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance;line-height:1.15}
+h1{font-size:2rem;font-weight:700}
+h2{font-size:1.45rem;font-weight:600}
+p{margin:0}
+button{font-family:var(--body);font-weight:800;font-size:1rem;border:0;border-radius:14px;padding:10px 16px;cursor:pointer;color:var(--ink);background:var(--panel);box-shadow:0 2px 0 var(--line);transition:transform .08s}
+button:active{transform:translateY(2px);box-shadow:none}
+button:focus-visible{outline:3px solid var(--sea);outline-offset:2px}
+button[disabled]{opacity:.5;cursor:default}
+.primary{background:var(--sun);color:var(--sun-ink);box-shadow:0 3px 0 #d9a92a}
+.go{background:var(--ok);color:#fff;box-shadow:0 3px 0 #1f6e42}
+
+/* header */
+.top{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.top svg{width:72px;height:72px;flex:none}
+.stars{margin-left:auto;font-family:var(--display);font-size:1.1rem;background:var(--panel);padding:6px 12px;border-radius:999px;border:2px solid var(--line);font-variant-numeric:tabular-nums}
+
+/* chapter tabs */
+.tabs{display:flex;gap:8px;flex-wrap:wrap}
+.tabs button{border-radius:999px;padding:8px 14px;font-family:var(--display);font-weight:600;border:2px solid var(--line)}
+.tabs button[aria-selected="true"]{background:var(--sea);color:#fff;border-color:var(--sea)}
+.tabs .done::after{content:" ★";color:var(--sun)}
+
+/* chapter card */
+.chapter{background:var(--panel);border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:14px;border:2px solid var(--line)}
+.bubble{display:flex;gap:12px;align-items:flex-start}
+.bubble svg{width:56px;height:56px;flex:none}
+.say{background:var(--sky);border-radius:18px 18px 18px 4px;padding:12px 14px;font-weight:700;min-width:0;flex:1}
+.say small{display:block;font-weight:500;color:var(--muted);margin-top:4px}
+
+/* playfield */
+.field{background:var(--grass);border-radius:16px;padding:8px;position:relative;max-width:100%;overflow:hidden}
+.grid{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;position:relative}
+.cell{aspect-ratio:1;border-radius:8px;background:rgba(255,255,255,.35);display:grid;place-items:center;font-size:1.6rem}
+.cell.wall{background:#6b4f3a;background-image:repeating-linear-gradient(0deg,transparent 0 30%,rgba(0,0,0,.15) 30% 34%)}
+.cell.goal{background:var(--sun)}
+.cell.maybe{background:rgba(255,255,255,.6);color:var(--berry);font-family:var(--display);font-weight:700}
+.bot{position:absolute;width:calc((100% - 20px)/6);aspect-ratio:1;transition:left .32s,top .32s;pointer-events:none;display:grid;place-items:center}
+.bot svg{width:86%;height:86%}
+.bot.bump{animation:bump .3s}
+@keyframes bump{50%{transform:scale(1.15) rotate(-8deg)}}
+.pocket{display:flex;gap:8px;align-items:center;flex-wrap:wrap;color:var(--muted);font-weight:700}
+
+/* program */
+.pad{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.pad .cmd{font-size:1.4rem;padding:6px 14px;background:var(--sky)}
+.pad .loop{background:var(--berry);color:#fff}
+.pad .cond{background:var(--coral);color:#fff}
+.prog{display:flex;flex-wrap:wrap;gap:6px;min-height:52px;padding:8px;border:2px dashed var(--line);border-radius:14px;align-items:center}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:10px;background:var(--sky);font-size:1.25rem;font-weight:800}
+.chip.loopchip{background:var(--berry);color:#fff;flex-wrap:wrap;font-size:1rem}
+.chip.loopchip .inner{display:inline-flex;gap:4px;background:rgba(255,255,255,.25);border-radius:8px;padding:2px 6px;min-width:34px;min-height:30px;font-size:1.25rem}
+.chip.condchip{background:var(--coral);color:#fff;font-size:1rem}
+.chip.running{outline:3px solid var(--sun)}
+.slots{color:var(--muted);font-weight:700;font-variant-numeric:tabular-nums}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.status{font-weight:800;min-height:1.5em}
+.status.good{color:var(--ok)} .status.oops{color:var(--bad)}
+
+/* teaching game */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px}
+.card{background:var(--sky);border-radius:14px;padding:10px;display:flex;flex-direction:column;align-items:center;gap:6px;border:3px solid transparent}
+.card svg{width:64px;height:64px}
+.card.big svg{width:80px;height:80px}
+.card .lab{display:flex;gap:4px}
+.card .lab button{padding:4px 8px;font-size:1.2rem;border-radius:10px}
+.card .lab button[aria-pressed="true"]{outline:3px solid var(--ink)}
+.card.yes{border-color:var(--ok)} .card.no{border-color:var(--bad)}
+.guess{font-family:var(--display);font-weight:600}
+.guess.right{color:var(--ok)} .guess.wrong{color:var(--bad)}
+.meter{display:flex;flex-direction:column;gap:4px}
+.meter div{display:grid;grid-template-columns:90px 1fr 40px;gap:8px;align-items:center;font-weight:700}
+.meter i{display:block;height:12px;border-radius:6px;background:var(--line);overflow:hidden}
+.meter i b{display:block;height:100%;background:var(--sea);width:0;transition:width .6s}
+
+/* chat */
+.log{display:flex;flex-direction:column;gap:8px;max-height:360px;overflow:auto;padding:4px}
+.msg{max-width:85%;padding:10px 14px;border-radius:16px;font-weight:700;white-space:pre-wrap;min-width:0;overflow-wrap:anywhere}
+.msg.me{align-self:flex-end;background:var(--sun);color:var(--sun-ink);border-bottom-right-radius:4px}
+.msg.bot{align-self:flex-start;background:var(--sky);border-bottom-left-radius:4px}
+.ask{display:flex;gap:8px}
+.ask input{flex:1;min-width:0;font:inherit;font-weight:700;padding:10px 14px;border-radius:14px;border:2px solid var(--line);background:var(--panel);color:var(--ink)}
+.ask input:focus-visible{outline:3px solid var(--sea)}
+.quick{display:flex;gap:6px;flex-wrap:wrap}
+.quick button{font-size:.9rem;padding:6px 10px;background:var(--sky)}
+
+.grown{color:var(--muted);font-size:.95rem;border-top:2px solid var(--line);padding-top:12px}
+.hidden{display:none}
+@media (prefers-reduced-motion: reduce){ .bot{transition:none} .bot.bump{animation:none} }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <span id="hero-bot"></span>
+    <div>
+      <h1>Sprocket's Code Quest</h1>
+      <p>Help a little robot get home by teaching it how to think.</p>
+    </div>
+    <div class="stars" id="starcount">★ 0 / 5</div>
+  </header>
+
+  <nav class="tabs" role="tablist" id="tabs">
+    <button role="tab" data-ch="0" aria-selected="true">1 · Steps</button>
+    <button role="tab" data-ch="1">2 · Loops</button>
+    <button role="tab" data-ch="2">3 · If</button>
+    <button role="tab" data-ch="3">4 · Teach</button>
+    <button role="tab" data-ch="4">5 · Ask</button>
+  </nav>
+
+  <!-- Chapters 1-3: the grid game -->
+  <section class="chapter" id="game">
+    <h2 id="g-title">Chapter 1: Robots only do what you say</h2>
+    <div class="bubble"><span class="botface"></span><div class="say"><span id="g-say"></span><small id="g-hint"></small></div></div>
+    <div class="field"><div class="grid" id="grid"></div><div class="bot" id="bot"></div></div>
+    <div class="pocket" id="pocket"></div>
+    <div class="pad" id="pad"></div>
+    <div class="prog" id="prog" aria-label="Sprocket's program"></div>
+    <div class="row">
+      <button class="go" id="run">▶ Run!</button>
+      <button id="clear">Clear</button>
+      <button id="undo">Undo</button>
+      <span class="slots" id="slots"></span>
+      <button id="next" class="primary hidden">Next level →</button>
+    </div>
+    <p class="status" id="g-status"></p>
+  </section>
+
+  <!-- Chapter 4: teach Sprocket -->
+  <section class="chapter hidden" id="teach">
+    <h2>Chapter 4: Teach Sprocket to learn</h2>
+    <div class="bubble"><span class="botface"></span><div class="say"><span id="t-say">Grown-ups told me a secret: I only like <b id="t-rule"></b> snacks. But I don't know what that means yet! Show me which ones are yummy and which are yucky, and I'll try to figure out the pattern.</span><small>This is how real AI learns: not from rules, but from examples.</small></div></div>
+    <div class="cards" id="train"></div>
+    <div class="row"><button class="primary" id="teachbtn">Teach Sprocket!</button><button id="newrule">New secret rule</button><span class="slots" id="t-count"></span></div>
+    <div id="learned" class="hidden">
+      <p class="status" id="t-status"></p>
+      <div class="meter" id="meter"></div>
+      <p style="margin-top:8px;font-weight:700">Now Sprocket guesses snacks it has never seen:</p>
+      <div class="cards" id="test"></div>
+      <p class="status" id="t-result"></p>
+    </div>
+  </section>
+
+  <!-- Chapter 5: chat -->
+  <section class="chapter hidden" id="chat">
+    <h2>Chapter 5: Ask Sprocket anything</h2>
+    <div class="bubble"><span class="botface"></span><div class="say">Now I'm a real AI! Ask me about coding, robots, or how I learn. I'll keep my answers short.<small id="c-note">The first question asks the grown-up to allow Sprocket to use Claude.</small></div></div>
+    <div class="quick" id="quick">
+      <button>What is a loop?</button><button>Are you alive?</button><button>How do you learn?</button><button>Why do robots make mistakes?</button><button>What should I build first?</button>
+    </div>
+    <div class="log" id="log"></div>
+    <form class="ask" id="askform"><input id="askbox" placeholder="Type a question for Sprocket…" maxlength="300" autocomplete="off"><button class="primary" id="askbtn" type="submit">Ask</button></form>
+  </section>
+
+  <p class="grown"><b>For grown-ups:</b> Chapters 1–3 teach sequencing, loops and conditionals, the three building blocks of every program. Chapter 4 shows how machine learning finds patterns from labelled examples and why too few examples cause mistakes. Chapter 5 is a live AI tutor that answers at an 8-year-old's level; sit with your child the first time it asks for permission. Progress stars are saved on this device.</p>
+</div>
+
+<script>
+// ---------- Sprocket, drawn once ----------
+const BOT = (mood='happy') => `<svg viewBox="0 0 64 64" aria-hidden="true">
+<line x1="32" y1="4" x2="32" y2="12" stroke="#5a3f00" stroke-width="3"/><circle cx="32" cy="4" r="4" fill="#ffcf4a"/>
+<rect x="12" y="12" width="40" height="32" rx="10" fill="#ff7a59"/>
+<rect x="18" y="18" width="28" height="16" rx="6" fill="#1f2d2a"/>
+${mood==='sad'
+  ? '<circle cx="26" cy="26" r="3" fill="#8fd3a5"/><circle cx="38" cy="26" r="3" fill="#8fd3a5"/><path d="M26 31 q6 -4 12 0" stroke="#8fd3a5" stroke-width="2" fill="none"/>'
+  : '<circle cx="26" cy="25" r="4" fill="#bfe9dc"/><circle cx="38" cy="25" r="4" fill="#bfe9dc"/><path d="M25 30 q7 5 14 0" stroke="#bfe9dc" stroke-width="2" fill="none"/>'}
+<rect x="22" y="44" width="8" height="12" rx="3" fill="#2aa0a3"/><rect x="34" y="44" width="8" height="12" rx="3" fill="#2aa0a3"/>
+<rect x="4" y="22" width="8" height="14" rx="4" fill="#2aa0a3"/><rect x="52" y="22" width="8" height="14" rx="4" fill="#2aa0a3"/>
+</svg>`;
+document.getElementById('hero-bot').innerHTML = BOT();
+document.querySelectorAll('.botface').forEach(e=>e.innerHTML=BOT());
+
+// ---------- progress ----------
+let stars = {};
+try{ stars = JSON.parse(localStorage.getItem('sprocket-stars')||'{}')||{} }catch(e){}
+function award(key){ stars[key]=true; try{localStorage.setItem('sprocket-stars',JSON.stringify(stars))}catch(e){} paintStars() }
+function paintStars(){
+  const n=Object.keys(stars).length; document.getElementById('starcount').textContent=`★ ${n} / 5`;
+  document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('done',!!stars['ch'+b.dataset.ch]));
+}
+paintStars();
+
+// ---------- tabs ----------
+const sections=['game','game','game','teach','chat'];
+let chapter=0;
+document.getElementById('tabs').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b) return;
+  chapter=+b.dataset.ch;
+  document.querySelectorAll('#tabs button').forEach(x=>x.setAttribute('aria-selected',x===b));
+  for(const id of ['game','teach','chat']) document.getElementById(id).classList.toggle('hidden',sections[chapter]!==id);
+  if(chapter<3) loadChapter(chapter);
+  if(chapter===3 && !teachStarted) newRule();
+});
+
+// ---------- grid levels ----------
+const COLS=6, ROWS=4;
+const CH = [
+ { title:'Chapter 1: Robots only do what you say',
+   say:'I want to reach the star, but I can only follow commands. Tap arrows to make my program, then press Run!',
+   hint:'A program is a list of steps, in order. Order matters!',
+   pad:['R','L','U','D'],
+   levels:[
+     {start:[0,1],goal:[3,1],walls:[]},
+     {start:[0,0],goal:[4,3],walls:[[2,0],[2,1],[2,2]]},
+     {start:[5,3],goal:[0,0],walls:[[3,3],[3,2],[1,2],[1,3]]},
+   ]},
+ { title:'Chapter 2: Loops save your fingers',
+   say:'This path is long! Instead of tapping → five times, put arrows inside a Repeat block. One block, many steps.',
+   hint:'Tap "Repeat", then the arrows to repeat, then "Close". Only a few slots fit, so you need the loop!',
+   pad:['R','L','U','D','LOOP'],
+   levels:[
+     {start:[0,1],goal:[5,1],walls:[],slots:3},
+     {start:[0,3],goal:[3,0],walls:[[1,3],[2,2],[3,1]],slots:3},
+     {start:[0,0],goal:[5,3],walls:[[0,1],[2,0],[1,2],[3,1],[4,2],[4,1]],slots:5},
+   ]},
+ { title:'Chapter 3: Let the robot decide',
+   say:'Some ? squares hide a gem, some don\'t, and it changes every run! I can\'t see them until I\'m standing there. Give me an IF block so I decide on my own.',
+   hint:'IF gem here → grab it. Put one IF on every ? square in your path.',
+   pad:['R','L','U','D','LOOP','IF'],
+   levels:[
+     {start:[0,1],goal:[4,1],walls:[],maybe:[[1,1],[3,1]],slots:8},
+     {start:[0,3],goal:[5,0],walls:[[2,3],[2,2],[4,1],[4,2]],maybe:[[1,3],[1,1],[3,0]],slots:12},
+   ]},
+];
+let lv=0, level=null, prog=[], openLoop=null, running=false, pos=[0,0], gems={}, pocket=0;
+
+function loadChapter(c){ lv=0; loadLevel() }
+function loadLevel(){
+  const c=CH[chapter]; level=c.levels[lv];
+  document.getElementById('g-title').textContent=c.title;
+  document.getElementById('g-say').textContent=c.say;
+  document.getElementById('g-hint').textContent=c.hint+`  (Level ${lv+1} of ${c.levels.length})`;
+  const pad=document.getElementById('pad'); pad.innerHTML='';
+  const names={R:'→',L:'←',U:'↑',D:'↓',LOOP:'Repeat ×',IF:'IF gem → grab'};
+  for(const k of c.pad){
+    const b=document.createElement('button'); b.className='cmd'+(k==='LOOP'?' loop':k==='IF'?' cond':''); b.textContent=names[k]; b.dataset.k=k;
+    if(k==='LOOP'){ const sel=document.createElement('select'); sel.id='loopn'; sel.innerHTML='<option>2</option><option selected>3</option><option>4</option><option>5</option>'; sel.style.cssText='font:inherit;border-radius:8px;margin-left:4px;color:#1f2d2a'; sel.addEventListener('click',e=>e.stopPropagation()); b.append(sel) }
+    pad.append(b);
+  }
+  const closeB=document.createElement('button'); closeB.id='closeloop'; closeB.className='loop hidden'; closeB.textContent='Close ]'; pad.append(closeB);
+  prog=[]; openLoop=null; reset(); drawGrid(); drawProg();
+  document.getElementById('next').classList.add('hidden'); setStatus('');
+}
+function reset(){
+  pos=[...level.start]; pocket=0; gems={};
+  (level.maybe||[]).forEach(m=>{ gems[m]=Math.random()<0.6 });
+  placeBot(); paintPocket();
+}
+function drawGrid(){
+  const g=document.getElementById('grid'); g.innerHTML='';
+  for(let y=0;y<ROWS;y++) for(let x=0;x<COLS;x++){
+    const d=document.createElement('div'); d.className='cell'; d.dataset.xy=x+','+y;
+    if(level.walls.some(w=>w[0]===x&&w[1]===y)){ d.classList.add('wall') }
+    else if(level.goal[0]===x&&level.goal[1]===y){ d.classList.add('goal'); d.textContent='★' }
+    else if((level.maybe||[]).some(m=>m[0]===x&&m[1]===y)){ d.classList.add('maybe'); d.textContent='?' }
+    g.append(d);
+  }
+}
+function placeBot(){
+  const b=document.getElementById('bot'); b.innerHTML=BOT();
+  const g=document.getElementById('grid'); const cw=(g.clientWidth-4*(COLS-1))/COLS;
+  b.style.width=cw+'px'; b.style.left=(8+pos[0]*(cw+4))+'px'; b.style.top=(8+pos[1]*(cw+4))+'px';
+}
+window.addEventListener('resize',placeBot);
+function paintPocket(){
+  const p=document.getElementById('pocket');
+  p.innerHTML = level.maybe ? `Gems grabbed: <span style="font-size:1.4rem">${'💎'.repeat(pocket)||'—'}</span>` : '';
+}
+
+// program editing
+const ARROW={R:'→',L:'←',U:'↑',D:'↓'};
+function slotsUsed(){ return prog.reduce((n,s)=>n+1+(s.steps?s.steps.length:0),0) }
+function drawProg(){
+  const p=document.getElementById('prog'); p.innerHTML='';
+  prog.forEach((s,i)=>{
+    const c=document.createElement('span');
+    if(s.steps){ c.className='chip loopchip'; c.innerHTML=`Repeat ×${s.n} <span class="inner">${s.steps.map(k=>ARROW[k]).join(' ')||(s===openLoop?'…':'')}</span>` }
+    else if(s==='IF'){ c.className='chip condchip'; c.textContent='IF gem → grab' }
+    else { c.className='chip'; c.textContent=ARROW[s] }
+    c.dataset.i=i; p.append(c);
+  });
+  if(!prog.length) p.innerHTML='<span style="color:var(--muted);font-weight:700">Your program goes here</span>';
+  const max=level.slots; document.getElementById('slots').textContent = max? `Slots: ${slotsUsed()} / ${max}` : `Steps: ${slotsUsed()}`;
+  document.getElementById('closeloop').classList.toggle('hidden',!openLoop);
+}
+document.getElementById('pad').addEventListener('click',e=>{
+  if(running) return; const b=e.target.closest('button'); if(!b) return;
+  const k=b.dataset.k;
+  if(b.id==='closeloop'){ openLoop=null; drawProg(); return }
+  if(level.slots && slotsUsed()>=level.slots){ setStatus('No more slots! Use a Repeat block to fit more steps.','oops'); return }
+  if(k==='LOOP'){ if(openLoop) return; openLoop={n:+document.getElementById('loopn').value,steps:[]}; prog.push(openLoop) }
+  else if(k==='IF'){ if(openLoop){ setStatus('Close the loop first.','oops'); return } prog.push('IF') }
+  else if(openLoop){ openLoop.steps.push(k) }
+  else prog.push(k);
+  setStatus(''); drawProg();
+});
+document.getElementById('clear').onclick=()=>{ if(running) return; prog=[]; openLoop=null; reset(); drawProg(); setStatus('') };
+document.getElementById('undo').onclick=()=>{ if(running) return;
+  if(openLoop && openLoop.steps.length) openLoop.steps.pop(); else { const last=prog.pop(); if(last===openLoop) openLoop=null } drawProg() };
+document.getElementById('next').onclick=()=>{ lv++; if(lv>=CH[chapter].levels.length){ lv=0 } loadLevel() };
+
+function setStatus(t,cls){ const s=document.getElementById('g-status'); s.textContent=t; s.className='status '+(cls||'') }
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+
+document.getElementById('run').onclick=async()=>{
+  if(running||!prog.length) return; if(openLoop){ setStatus('Close your Repeat block first.','oops'); return }
+  running=true; reset(); setStatus('Running…'); document.getElementById('next').classList.add('hidden');
+  const chips=[...document.querySelectorAll('#prog .chip')];
+  let crashed=false, expanded=[];
+  prog.forEach((s,i)=>{ if(s.steps) for(let r=0;r<s.n;r++) s.steps.forEach(k=>expanded.push([k,i])); else expanded.push([s,i]) });
+  // check IF at the starting square too
+  for(const [k,i] of expanded){
+    chips.forEach(c=>c.classList.toggle('running',+c.dataset.i===i));
+    await wait(380);
+    if(k==='IF'){
+      if(gems[pos]){ gems[pos]=false; pocket++; paintPocket(); setStatus('Gem here → grabbed it! 💎'); document.querySelector(`[data-xy="${pos[0]},${pos[1]}"]`).textContent='✓' }
+      else setStatus('No gem here, so Sprocket skips the grab.');
+      continue;
+    }
+    const d={R:[1,0],L:[-1,0],U:[0,-1],D:[0,1]}[k]; const nx=pos[0]+d[0], ny=pos[1]+d[1];
+    if(nx<0||ny<0||nx>=COLS||ny>=ROWS||level.walls.some(w=>w[0]===nx&&w[1]===ny)){
+      const b=document.getElementById('bot'); b.classList.add('bump'); b.innerHTML=BOT('sad'); await wait(300); b.classList.remove('bump'); crashed=true; break;
+    }
+    pos=[nx,ny]; placeBot();
+  }
+  chips.forEach(c=>c.classList.remove('running'));
+  const atGoal=pos[0]===level.goal[0]&&pos[1]===level.goal[1];
+  const missed=Object.values(gems).some(v=>v);
+  if(crashed) setStatus('Bonk! Sprocket walked into something. Robots don\'t stop by themselves. Fix the step and run again.','oops');
+  else if(!atGoal) setStatus('Hmm, Sprocket stopped before the star. What step is missing?','oops');
+  else if(missed) setStatus('You reached the star, but a gem was left behind. Sprocket needs an IF on every ? square.','oops');
+  else {
+    const last=lv===CH[chapter].levels.length-1;
+    setStatus(last?'⭐ Chapter complete! Sprocket is one step closer to home.':'🎉 You did it! Ready for the next level?','good');
+    award('ch'+chapter); document.getElementById('next').classList.remove('hidden');
+    document.getElementById('next').textContent = last ? 'Play again from level 1' : 'Next level →';
+  }
+  running=false;
+};
+
+// ---------- Chapter 4: teaching game ----------
+const FEATS={shape:['round','square'],color:['red','blue'],size:['big','small']};
+const FEATWORD={round:'round',square:'square',red:'red',blue:'blue',big:'big',small:'small'};
+let rule=null, trainSet=[], labels={}, teachStarted=false;
+function snackSVG(s){
+  const col=s.color==='red'?'#ff5a4a':'#3b82f6'; const r=s.size==='big'?26:16;
+  const body=s.shape==='round'?`<circle cx="32" cy="32" r="${r}" fill="${col}"/>`:`<rect x="${32-r}" y="${32-r}" width="${2*r}" height="${2*r}" rx="5" fill="${col}"/>`;
+  return `<svg viewBox="0 0 64 64" aria-hidden="true">${body}<circle cx="${32-r/3}" cy="${32-r/3}" r="${r/5}" fill="rgba(255,255,255,.6)"/></svg>`;
+}
+function allSnacks(){ const out=[]; for(const shape of FEATS.shape) for(const color of FEATS.color) for(const size of FEATS.size) out.push({shape,color,size}); return out }
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]] } return a }
+function newRule(){
+  teachStarted=true;
+  const f=shuffle(Object.keys(FEATS))[0]; rule={feat:f,val:shuffle([...FEATS[f]])[0]};
+  document.getElementById('t-rule').textContent=FEATWORD[rule.val];
+  const all=shuffle(allSnacks()); trainSet=all.slice(0,6); testSet=all.slice(6,8).concat(shuffle(allSnacks()).slice(0,2));
+  labels={}; document.getElementById('learned').classList.add('hidden');
+  const tr=document.getElementById('train'); tr.innerHTML='';
+  trainSet.forEach((s,i)=>{
+    const c=document.createElement('div'); c.className='card'+(s.size==='big'?' big':''); c.dataset.i=i;
+    c.innerHTML=snackSVG(s)+`<div class="lab"><button aria-label="yummy" aria-pressed="false" data-v="1">😋</button><button aria-label="yucky" aria-pressed="false" data-v="0">🤢</button></div>`;
+    tr.append(c);
+  });
+  countLabels();
+}
+let testSet=[];
+document.getElementById('train').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b) return; const card=b.closest('.card'); const i=+card.dataset.i;
+  labels[i]=+b.dataset.v; card.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b));
+  card.classList.toggle('yes',labels[i]===1); card.classList.toggle('no',labels[i]===0); countLabels();
+});
+function countLabels(){ const n=Object.keys(labels).length; document.getElementById('t-count').textContent=`Labelled: ${n} / ${trainSet.length}`; document.getElementById('teachbtn').disabled=n<2 }
+document.getElementById('newrule').onclick=newRule;
+document.getElementById('teachbtn').onclick=()=>{
+  // Sprocket "learns": for every possible simple rule, how many labelled examples agree?
+  const idx=Object.keys(labels).map(Number); const scores=[];
+  for(const f in FEATS) for(const v of FEATS[f]){
+    const agree=idx.filter(i=>((trainSet[i][f]===v)?1:0)===labels[i]).length; scores.push({f,v,agree});
+  }
+  const best=Math.max(...scores.map(s=>s.agree)); const tied=shuffle(scores.filter(s=>s.agree===best)); const learned=tied[0];
+  const correct=learned.f===rule.feat&&learned.v===rule.val;
+  document.getElementById('learned').classList.remove('hidden');
+  const st=document.getElementById('t-status');
+  st.className='status '+(correct?'good':'oops');
+  st.textContent = tied.length>1
+    ? `Sprocket saw ${idx.length} examples and found ${tied.length} patterns that all fit! It picked "${FEATWORD[learned.v]}". That was a guess.`
+    : `Sprocket saw ${idx.length} examples and thinks: "I like ${FEATWORD[learned.v]} snacks!"`;
+  const m=document.getElementById('meter'); m.innerHTML='';
+  scores.sort((a,b)=>b.agree-a.agree).slice(0,4).forEach(s=>{ const d=document.createElement('div'); d.innerHTML=`<span>${FEATWORD[s.v]}</span><i><b></b></i><span>${s.agree}/${idx.length}</span>`; m.append(d); requestAnimationFrame(()=>d.querySelector('b').style.width=(100*s.agree/idx.length)+'%') });
+  const te=document.getElementById('test'); te.innerHTML=''; let right=0;
+  testSet.forEach(s=>{
+    const guess=s[learned.f]===learned.v; const truth=s[rule.feat]===rule.val; if(guess===truth) right++;
+    const c=document.createElement('div'); c.className='card'+(s.size==='big'?' big':'');
+    c.innerHTML=snackSVG(s)+`<span class="guess ${guess===truth?'right':'wrong'}">${guess?'😋 yummy':'🤢 yucky'} ${guess===truth?'✓':'✗'}</span>`; te.append(c);
+  });
+  const r=document.getElementById('t-result');
+  if(right===testSet.length){ r.className='status good'; r.textContent='⭐ Sprocket got them all right! Good examples make a good learner.'; award('ch3') }
+  else { r.className='status oops'; r.textContent=`Sprocket got ${right} of ${testSet.length}. It learned the wrong pattern! Real AI makes this mistake when it hasn't seen enough different examples. Label more cards (especially ones that look alike but taste different) and teach again.` }
+};
+
+// ---------- Chapter 5: ask Sprocket (live AI) ----------
+const RULES=`You are Sprocket, a small friendly robot in a learning game for an 8-year-old child. Answer in 1 to 3 short, simple sentences a second-grader can read. Be warm, playful and honest. Talk about coding, computers, robots, and how AI learns from examples. If asked something off-topic, unsafe, scary, or about grown-up subjects, gently say that's not something you know about and steer back to coding. Never ask the child for personal information. Never pretend to be a person: you are a computer program that makes guesses from patterns, and you can make mistakes. Do not use markdown.`;
+let turns=[], sampleFn=null, asking=false;
+const FALLBACK={
+ 'What is a loop?':'A loop tells the computer "do this again and again." Instead of typing the same step five times, you write it once and say Repeat 5. You used one in Chapter 2!',
+ 'Are you alive?':'Nope! I\'m a computer program. I don\'t feel hungry or sleepy. I just follow instructions and look for patterns, really fast.',
+ 'How do you learn?':'People show me lots of examples with the answers, and I look for what the yummy ones have in common. The more good examples, the better my guesses.',
+ 'Why do robots make mistakes?':'Because I only know what I was shown. If my examples were missing something, my guess will be off. That\'s why humans check my work!',
+ 'What should I build first?':'Make a program that draws your name with a turtle, or a game where a cat catches falling stars. Small things first, then bigger!',
+};
+function addMsg(text,who){ const m=document.createElement('div'); m.className='msg '+who; m.textContent=text; document.getElementById('log').append(m); m.scrollIntoView({block:'nearest'}); return m }
+async function ask(q){
+  if(asking||!q.trim()) return; asking=true; document.getElementById('askbtn').disabled=true;
+  addMsg(q,'me'); const bubble=addMsg('Thinking…','bot');
+  if(!sampleFn){ await wait(500); bubble.textContent=FALLBACK[q]||'My big brain is turned off right now, so I can only answer the question buttons above. Try one of those!'; done(); return }
+  turns.push({role:'user',content:q});
+  try{
+    const {text}=await sampleFn([{role:'user',content:RULES},...turns.slice(-8)],{cache:false,modelTier:'quick',onText:({text})=>{bubble.textContent=text}});
+    turns.push({role:'assistant',content:text}); award('ch4');
+  }catch(e){
+    turns.pop();
+    const copy={not_granted:'A grown-up hasn\'t switched on my big brain yet, so I can only answer the question buttons above.',rate_limited:'Whoa, so many questions! Let me rest a minute and ask again.',refused:'I don\'t know about that one. Ask me something about coding!'}[e.code];
+    if(e.code==='not_granted'||e.code==='sampling_disabled'||e.code==='not_declared'){ sampleFn=null }
+    bubble.textContent = e.text || copy || 'Oops, my wires got tangled. Try asking again.';
+  }
+  done(); function done(){ asking=false; document.getElementById('askbtn').disabled=false }
+}
+document.getElementById('askform').addEventListener('submit',e=>{ e.preventDefault(); const b=document.getElementById('askbox'); const q=b.value; b.value=''; ask(q) });
+document.getElementById('quick').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) ask(b.textContent) });
+(async()=>{ try{ sampleFn = window.claude?.use ? await window.claude.use('sample') : null }catch(e){ sampleFn=null }
+  if(!sampleFn) document.getElementById('c-note').textContent='Live answers aren\'t available in this view, so Sprocket answers the question buttons only.'; })();
+
+// boot
+loadChapter(0);
+</script>
+
+</body></html>
