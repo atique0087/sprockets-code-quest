@@ -193,7 +193,7 @@ textarea.plain{width:100%;min-height:110px;font:inherit;font-weight:700;padding:
     </div>
 
     <div id="ai-snack">
-      <div class="bubble"><span class="botface"></span><div class="say">Grown-ups told me a secret: I only like <b id="t-rule"></b> snacks. I don't know what that means yet! Show me which are yummy and which are yucky and I'll search for the pattern.<small>This is called <b>training</b>. AIs don't get rules; they get examples and find the rule themselves.</small></div></div>
+      <div class="bubble"><span class="botface"></span><div class="say">Baba told me a secret: I only like <b id="t-rule"></b> snacks. I don't know what that means yet! Show me which are yummy and which are yucky and I'll search for the pattern.<small>This is called <b>training</b>. AIs don't get rules; they get examples and find the rule themselves.</small></div></div>
       <div class="cards" id="train" style="margin-top:12px"></div>
       <div class="row" style="margin-top:10px"><button class="primary" id="teachbtn">Teach Sprocket!</button><button id="newrule">New secret rule</button><span class="slots" id="t-count"></span></div>
       <div id="learned" class="hidden" style="margin-top:10px">
@@ -218,7 +218,7 @@ textarea.plain{width:100%;min-height:110px;font:inherit;font-weight:700;padding:
     </div>
 
     <div id="ai-prompt" class="hidden">
-      <div class="bubble"><span class="botface"></span><div class="say">When grown-ups use an AI, they write <b>instructions</b> (a "prompt"). You write mine! Tell me how to talk, then ask me something and see if I follow your rules.<small>Try: "Talk like a pirate." or "Only answer with rhymes." or "Pretend you are a cat who loves math."</small></div></div>
+      <div class="bubble"><span class="botface"></span><div class="say">When a someone use an AI, they write <b>instructions</b> (a "prompt"). You write mine! Tell me how to talk, then ask me something and see if I follow your rules.<small>Try: "Talk like a pirate." or "Only answer with rhymes." or "Pretend you are a cat who loves math."</small></div></div>
       <span class="lab" style="margin-top:12px">Sprocket's rules (you write them)</span>
       <textarea class="plain" id="rules" placeholder="Talk like a pirate and say Arr at the end of every sentence.">Talk like a pirate and say Arr at the end of every sentence.</textarea>
       <div class="inrow" style="margin-top:8px"><input id="prompt-q" placeholder="Now ask Sprocket something…" value="What is a computer?"><button class="primary" id="prompt-go">Try it</button></div>
@@ -256,13 +256,13 @@ textarea.plain{width:100%;min-height:110px;font:inherit;font-weight:700;padding:
   <!-- CHAT -->
   <section class="chapter hidden" id="chat">
     <h2>Ask Sprocket anything</h2>
-    <div class="bubble"><span class="botface"></span><div class="say">Ask me about Python, web pages, robots, or how I learn. Short answers, promise.<small id="c-note">The first question asks a grown-up to allow Sprocket to use Claude.</small></div></div>
+    <div class="bubble"><span class="botface"></span><div class="say">Ask me about Python, web pages, robots, or how I learn. Short answers, promise.<small id="c-note">The first question asks a Othoi to allow Sprocket to use Claude.</small></div></div>
     <div class="quick" id="quick"><button>What is a variable?</button><button>What does HTML mean?</button><button>Are you alive?</button><button>How do you learn?</button><button>What can I build next?</button></div>
     <div class="log" id="log"></div>
     <form class="ask" id="askform"><input id="askbox" placeholder="Type a question for Sprocket…" maxlength="300" autocomplete="off"><button class="primary" id="askbtn" type="submit">Ask</button></form>
   </section>
 
-  <p class="grown"><b>For grown-ups:</b> Python runs entirely in the browser (Skulpt), so nothing is installed and nothing leaves the device when she presses Run. The Hint and Check buttons, the prompt-writing lab and the chat use Claude; the first use asks your permission, and Sprocket is instructed to give nudges rather than full answers, stay on topic, and never ask for personal details. "Show answer" is always available offline. Stars and playground code are saved on this device.</p>
+  <p class="grown"><b>Othoi:</b> Python runs entirely in the browser (Skulpt), so nothing is installed and nothing leaves the device when she presses Run. The Hint and Check buttons, the prompt-writing lab and the chat use Claude; the first use asks your permission, and Sprocket is instructed to give nudges rather than full answers, stay on topic, and never ask for personal details. "Show answer" is always available offline. Stars and playground code are saved on this device.</p>
 </div>
 
 <script>
