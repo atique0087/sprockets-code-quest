@@ -1,10 +1,6 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Sprocket's Code Quest</title>
-
+<meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;700;800&display=swap">
 <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
@@ -84,9 +80,9 @@ iframe.preview{width:100%;min-height:220px;border:2px solid var(--line);border-r
 .cell.wall{background:#6b4f3a;background-image:repeating-linear-gradient(0deg,transparent 0 30%,rgba(0,0,0,.15) 30% 34%)}
 .cell.goal{background:var(--sun)}
 .cell.maybe{background:rgba(255,255,255,.6);color:var(--berry);font-family:var(--display);font-weight:700}
-.bot{position:absolute;aspect-ratio:1;transition:left .32s,top .32s;pointer-events:none;display:grid;place-items:center}
-.bot svg{width:86%;height:86%}
-.bot.bump{animation:bump .3s}
+.field .bot{position:absolute;aspect-ratio:1;transition:left .32s,top .32s;pointer-events:none;display:grid;place-items:center}
+.field .bot svg{width:86%;height:86%}
+.field .bot.bump{animation:bump .3s}
 @keyframes bump{50%{transform:scale(1.15) rotate(-8deg)}}
 .pocket{display:flex;gap:8px;align-items:center;flex-wrap:wrap;color:var(--muted);font-weight:700}
 .pad{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
@@ -120,10 +116,20 @@ textarea.plain{width:100%;min-height:110px;font:inherit;font-weight:700;padding:
 .story b{color:var(--sea)}
 
 /* chat */
-.log{display:flex;flex-direction:column;gap:8px;max-height:360px;overflow:auto;padding:4px}
-.msg{max-width:85%;padding:10px 14px;border-radius:16px;font-weight:700;white-space:pre-wrap;min-width:0;overflow-wrap:anywhere}
-.msg.me{align-self:flex-end;background:var(--sun);color:var(--sun-ink);border-bottom-right-radius:4px}
-.msg.bot{align-self:flex-start;background:var(--sky);border-bottom-left-radius:4px}
+/* chat: ChatGPT-style rows with an avatar, full width, page scrolls */
+.log{display:flex;flex-direction:column;gap:14px;padding:4px 0}
+.row-msg{display:flex;gap:10px;align-items:flex-start}
+.row-msg .av{width:36px;height:36px;flex:none;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-weight:700;background:var(--sun);color:var(--sun-ink)}
+.row-msg.bot .av{background:var(--sky)}
+.row-msg .av svg{width:30px;height:30px}
+.msg{flex:1;min-width:0;padding:10px 14px;border-radius:14px;font-weight:600;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere;font-size:1.05rem}
+.msg.me{background:var(--code-bg)}
+.msg.bot{background:var(--panel);border:2px solid var(--line)}
+.msg .nm{display:block;font-family:var(--display);font-weight:600;color:var(--muted);font-size:.85rem;margin-bottom:2px}
+.typing{display:inline-flex;gap:4px;align-items:center;height:1.2em}
+.typing i{width:8px;height:8px;border-radius:50%;background:var(--muted);animation:blink 1.2s infinite}
+.typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,80%,100%{opacity:.25}40%{opacity:1}}
 .ask{display:flex;gap:8px}
 .ask input{flex:1;min-width:0;font:inherit;font-weight:700;padding:10px 14px;border-radius:14px;border:2px solid var(--line);background:var(--panel);color:var(--ink)}
 .quick{display:flex;gap:6px;flex-wrap:wrap}
@@ -131,12 +137,22 @@ textarea.plain{width:100%;min-height:110px;font:inherit;font-weight:700;padding:
 .banner{position:relative;height:130px;border-radius:16px;overflow:hidden;background:linear-gradient(var(--sky),var(--bg));border:2px solid var(--line)}
 .banner svg{width:100%;height:100%;display:block}
 .banner .cap{position:absolute;left:12px;bottom:8px;font-family:var(--display);font-weight:600;font-size:.9rem;background:var(--panel);padding:3px 10px;border-radius:999px;border:2px solid var(--line)}
+.who{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--panel);border:2px solid var(--line);border-radius:16px;padding:8px 14px;font-weight:800}
+.who .names{display:flex;gap:6px;flex-wrap:wrap}
+.who .names button{padding:6px 12px;border-radius:999px;background:var(--sky)}
+.who .names button[aria-pressed="true"]{background:var(--sun);color:var(--sun-ink)}
+.who form{display:flex;gap:6px;margin-left:auto}
+.who input{font:inherit;font-weight:700;padding:6px 10px;border-radius:10px;border:2px solid var(--line);width:130px;min-width:0}
+.statgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.stat{background:var(--sky);border-radius:14px;padding:10px 12px}
+.stat b{font-family:var(--display);font-size:1.5rem;display:block;font-variant-numeric:tabular-nums}
+.stat span{font-size:.9rem;color:var(--muted);font-weight:700}
+table.sess{border-collapse:collapse;width:100%;font-size:.95rem;font-variant-numeric:tabular-nums}
+table.sess th,table.sess td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+table.sess th{font-family:var(--display);font-weight:600}
 .grown{color:var(--ink);font-size:1rem;background:var(--panel);border:2px solid var(--line);border-radius:16px;padding:14px 16px}
-@media (prefers-reduced-motion: reduce){ .bot{transition:none} .bot.bump{animation:none} }
+@media (prefers-reduced-motion: reduce){ .field .bot{transition:none} .field .bot.bump{animation:none} }
 </style>
-</head>
-<body>
-
 
 <div class="wrap">
   <header class="top">
@@ -156,6 +172,8 @@ textarea.plain{width:100%;min-height:110px;font:inherit;font-weight:700;padding:
     <button role="tab" data-t="play">🛠 Playground</button>
     <button role="tab" data-t="chat">💬 Ask Sprocket</button>
   </nav>
+
+  <div class="who" id="who"><span>Who's playing?</span><span class="names" id="names"></span><form id="addname"><input id="newname" placeholder="Add a name" maxlength="20" autocomplete="off"><button class="soft" type="submit">Add</button></form></div>
 
   <!-- PYTHON -->
   <section class="chapter hidden" id="py">
@@ -273,6 +291,18 @@ textarea.plain{width:100%;min-height:110px;font:inherit;font-weight:700;padding:
     <form class="ask" id="askform"><input id="askbox" placeholder="Type a question for Sprocket…" maxlength="300" autocomplete="off"><button class="primary" id="askbtn" type="submit">Ask</button></form>
   </section>
 
+  <!-- STATS -->
+  <section class="chapter hidden" id="stats" hidden>
+    <h2>Pukus Pakus: who played, and how long</h2>
+    <p id="stats-note" style="font-weight:700">Loading…</p>
+    <div class="statgrid" id="stat-players"></div>
+    <h3>Time per tab (all players)</h3>
+    <div class="meter" id="stat-tabs"></div>
+    <h3>Recent sessions</h3>
+    <div style="overflow-x:auto"><table class="sess" id="stat-sessions"></table></div>
+    <div class="row"><button class="soft" id="stats-refresh">Refresh</button></div>
+  </section>
+
   <p class="grown"><b>For Pukus Pakus:</b> Python runs entirely in the browser (Skulpt), so nothing is installed and nothing leaves the device when she presses Run. The Hint and Check buttons, the prompt-writing lab and the chat use Claude; the first use asks your permission, and Sprocket is instructed to give nudges rather than full answers, stay on topic, and never ask for personal details. "Show answer" is always available offline. Stars and playground code are saved on this device.</p>
 </div>
 
@@ -296,15 +326,34 @@ const wait=ms=>new Promise(r=>setTimeout(r,ms));
 function store(k,v){ try{localStorage.setItem(k,JSON.stringify(v))}catch(e){} }
 function load(k,d){ try{ const v=JSON.parse(localStorage.getItem(k)); return v==null?d:v }catch(e){ return d } }
 
+// ---------- usage tracking (who, how long, which tab) ----------
+const track=(()=>{
+  const names=load('sprocket-names',[]); let player=load('sprocket-player','');
+  const s={id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),player,started:Date.now(),ended:Date.now(),seconds:0,tabs:{},runs:0,stars:0,device:/Mobi|Tablet|iPad/i.test(navigator.userAgent)?'tablet/phone':'computer'};
+  let curTab='robot', tabSince=Date.now(), db=null, dirty=true, saving=false;
+  function tick(){ const now=Date.now(); if(document.visibilityState==='visible'){ const d=(now-tabSince)/1000; s.tabs[curTab]=(s.tabs[curTab]||0)+d; s.seconds+=d; s.ended=now; dirty=true } tabSince=now }
+  async function save(){ if(!db||!dirty||saving) return; saving=true; try{ const body={...s,seconds:Math.round(s.seconds),tabs:Object.fromEntries(Object.entries(s.tabs).map(([k,v])=>[k,Math.round(v)]))}; await db.doc('sessions/'+s.id).set(body); dirty=false }catch(e){} saving=false }
+  function paintNames(){ $('names').innerHTML=names.map(n=>`<button aria-pressed="${n===player}">${n.replace(/[<>&]/g,'')}</button>`).join('')||'<span style="color:var(--muted)">add a name →</span>' }
+  $('names').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; player=b.textContent; s.player=player; store('sprocket-player',player); dirty=true; paintNames() });
+  $('addname').addEventListener('submit',e=>{ e.preventDefault(); const n=$('newname').value.trim(); if(!n) return; if(!names.includes(n)) names.push(n); store('sprocket-names',names); $('newname').value=''; player=n; s.player=n; store('sprocket-player',n); dirty=true; paintNames() });
+  paintNames();
+  (async()=>{ try{ db = window.claude?.use ? await window.claude.use('db') : null; const user = window.claude?.use ? await window.claude.use('user') : null; if(user){ try{ s.viewer=await user.id() }catch(e){} } }catch(e){ db=null } save() })();
+  setInterval(()=>{ tick(); save() },30000);
+  document.addEventListener('visibilitychange',()=>{ tick(); save() });
+  window.addEventListener('pagehide',()=>{ tick(); save() });
+  return { tab(t){ tick(); curTab=t }, run(){ s.runs++; dirty=true }, star(n){ s.stars=n; dirty=true }, get db(){ return db }, get me(){ return s } };
+})();
+
 // ---------- stars ----------
 let stars=load('sprocket-stars2',{});
-function award(key){ if(stars[key]) return; stars[key]=true; store('sprocket-stars2',stars); paintStars() }
+function award(key){ if(stars[key]) return; stars[key]=true; store('sprocket-stars2',stars); paintStars(); track.star(Object.keys(stars).length) }
 function paintStars(){ $('starcount').textContent=`★ ${Object.keys(stars).length}`; document.querySelectorAll('.sub button[data-l]').forEach(b=>b.classList.toggle('done',!!stars[b.dataset.l])) }
 
 // ---------- tabs ----------
 $('tabs').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return;
   document.querySelectorAll('#tabs button').forEach(x=>x.setAttribute('aria-selected',x===b));
-  for(const id of ['py','html','ai','play','robot','chat']) $(id).classList.toggle('hidden',b.dataset.t!==id);
+  for(const id of ['py','html','ai','play','robot','chat','stats']) $(id).classList.toggle('hidden',b.dataset.t!==id);
+  track.tab(b.dataset.t); if(b.dataset.t==='stats') showStats();
   if(b.dataset.t==='robot') placeBot(); if(b.dataset.t==='ai'&&!teachStarted) newRule(); });
 function subTabs(container, onPick){ container.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; container.querySelectorAll('button').forEach(x=>x.setAttribute('aria-selected',x===b)); onPick(b) }) }
 function editorKeys(ta){ ta.addEventListener('keydown',e=>{ if(e.key==='Tab'){ e.preventDefault(); const s=ta.selectionStart; ta.setRangeText('    ',s,ta.selectionEnd,'end') } }) }
@@ -313,12 +362,28 @@ document.querySelectorAll('textarea.code').forEach(editorKeys);
 // ---------- Sprocket's AI brain (Claude via the page) ----------
 let sampleFn=null, aiReady=(async()=>{ try{ sampleFn = window.claude?.use ? await window.claude.use('sample') : null }catch(e){ sampleFn=null } if(!sampleFn) $('c-note').textContent='Live answers aren\'t available in this view; Hint and Check give built-in tips instead.'; })();
 const PERSONA=`You are Sprocket, a small friendly robot tutor inside a coding game for an 8-year-old who is learning Python, HTML and how AI works. Use 1 to 3 short, simple sentences a second-grader can read. Be warm and encouraging. Never write the full solution unless the child explicitly asks for the answer; give one nudge that points at the exact line or idea to fix. Stay on coding and AI topics; if asked about anything unsafe, scary or grown-up, say that's not something you know about and return to coding. Never ask for personal information. You are a computer program, not a person. No markdown, no code fences; if you show code, show at most one short line.`;
+// Why is the brain off? Returns a kid-readable reason and, where possible, a way to switch it on.
+async function brainOff(box, fallback){
+  let perm=null, st='unavailable';
+  try{ perm = window.claude?.use ? await window.claude.use('permissions') : null; if(perm) st=await perm.state('sample') }catch(e){}
+  box.innerHTML='';
+  const p=document.createElement('div'); box.append(p);
+  if(!window.claude?.use){ p.textContent='Sprocket\'s live brain only works when this page is opened inside the Claude app. '+fallback; return }
+  if(st==='prompt'||st==='denied'){
+    p.textContent = st==='denied' ? 'Sprocket\'s brain is switched off for this page. Pukus Pakus can switch it on in the page\'s Permissions menu.' : 'Sprocket\'s brain needs Pukus Pakus to say yes once.';
+    const b=document.createElement('button'); b.className='primary'; b.style.marginTop='8px'; b.textContent='Turn on Sprocket\'s brain';
+    b.onclick=async()=>{ b.disabled=true; try{ let r=await perm.request(['sample']); if(r.sample!=='granted'){ await perm.manage().catch(()=>{}); r=await perm.state('sample'); if(r==='granted') r={sample:'granted'} }
+      if((r.sample||r)==='granted'){ sampleFn=await window.claude.use('sample'); p.textContent='Brain is on! Press the button again.'; b.remove() } else { p.textContent='Still off. Open the ⋯ menu at the top of this page, choose Permissions, and allow Claude.'; b.disabled=false } }catch(e){ p.textContent='Open the ⋯ menu at the top of this page, choose Permissions, and allow Claude.'; b.disabled=false } };
+    box.append(b); return }
+  p.textContent='Sprocket\'s live brain isn\'t available on this account right now. '+fallback;
+}
 async function sprocket(box, prompt, fallback){
   box.classList.remove('hidden'); box.textContent='Sprocket is thinking…';
   await aiReady;
-  if(!sampleFn){ box.textContent=fallback; return }
+  if(!sampleFn){ try{ sampleFn = window.claude?.use ? await window.claude.use('sample') : null }catch(e){} }
+  if(!sampleFn){ await brainOff(box, fallback); return }
   try{ const {text}=await sampleFn(PERSONA+'\n\n'+prompt,{modelTier:'quick',cache:false,onText:({text})=>{box.textContent=text}}); return text }
-  catch(e){ if(['not_granted','sampling_disabled','not_declared','capability_disabled'].includes(e.code)) sampleFn=null;
+  catch(e){ if(['not_granted','sampling_disabled','not_declared','capability_disabled'].includes(e.code)){ sampleFn=null; await brainOff(box, fallback); return }
     box.textContent = e.text || ({rate_limited:'Whoa, lots of questions! Let me rest a minute.',refused:'I can\'t help with that one. Let\'s get back to the code!'}[e.code]) || fallback }
 }
 
@@ -397,7 +462,7 @@ function lessonUI(prefix, lessons, run){
     if(prefix==='py'){ $('py-out').textContent=''; $('turtle-box').innerHTML='' } else $('html-view').srcdoc=wrapHtml(load(prefix+'-code'+i,L.starter)); paintStars() }
   subTabs(sub,b=>show(+b.dataset.i));
   $(prefix+'-reset').onclick=()=>{ $(prefix+'-code').value=lessons[cur].starter; store(prefix+'-code'+cur,null); if(prefix==='html') $('html-view').srcdoc=wrapHtml(lessons[cur].starter) };
-  $(prefix+'-run').onclick=async()=>{ const code=$(prefix+'-code').value; store(prefix+'-code'+cur,code); tries++;
+  $(prefix+'-run').onclick=async()=>{ const code=$(prefix+'-code').value; store(prefix+'-code'+cur,code); tries++; track.run();
     lastResult=await run(code); const L=lessons[cur]; const ok=L.check(lastResult.output??code,code,lastResult.error);
     const st=$(prefix+'-status');
     if(ok){ st.className='status good'; st.textContent= cur<lessons.length-1 ? '⭐ Yes! That\'s exactly right. Try the next lesson when you\'re ready.' : '⭐ You finished every lesson! Now go wild in the Playground.'; award(prefix+cur) }
@@ -424,7 +489,7 @@ function setPlay(m){ store('play-code'+playMode,$('play-code').value); playMode=
   if(m==='html') $('play-view').srcdoc=wrapHtml($('play-code').value) }
 setPlay('py');
 let playLast=null;
-$('play-run').onclick=async()=>{ const code=$('play-code').value; store('play-code'+playMode,code);
+$('play-run').onclick=async()=>{ const code=$('play-code').value; store('play-code'+playMode,code); track.run();
   if(playMode==='py') playLast=await runPy(code,$('play-out'),$('play-turtle'),'play-inrow'); else { $('play-view').srcdoc=wrapHtml(code); playLast={output:'(web page shown)'} } };
 $('play-check').onclick=()=>sprocket($('play-help'),`The child wrote this ${playMode==='py'?'Python':'HTML'} in a free playground:\n${$('play-code').value}\nWhen run: ${playLast?(playLast.error?'ERROR: '+playLast.error:'OUTPUT: '+playLast.output):'(not run yet)'}\n\nSay what's great about it, and if there's a bug, point to the line in one sentence. Then suggest ONE small thing to add.`,'Run it and read what Sprocket prints. If there is a warning, it tells you which line to look at.');
 $('play-idea').onclick=()=>sprocket($('play-help'),`Suggest ONE fun, small ${playMode==='py'?'Python (print, loops, if, lists, turtle, input)':'HTML (headings, paragraphs, lists, buttons, style)'} project an 8-year-old could build in 10 minutes. Describe it in 2 sentences and name the first line of code to write.`, playMode==='py'?'Idea: a "guess my number" game. Start with secret = 7, then use input() and if to tell the player if they got it.':'Idea: a menu for an imaginary restaurant. Start with <h1>, then a <ul> list of silly foods with prices.');
@@ -468,7 +533,7 @@ $('startwords').addEventListener('click',async e=>{ const b=e.target.closest('bu
 
 // ---------- AI Lab 3: write the rules ----------
 $('prompt-go').onclick=()=>{ const rules=$('rules').value.trim(), q=$('prompt-q').value.trim(); if(!q) return;
-  sprocket($('prompt-out'),`A child wrote these rules for how you should talk: "${rules}". Follow the child's rules as closely as you can while staying kind and safe for an 8-year-old, in 1 to 3 sentences. Then answer their question: ${q}`,'Sprocket\'s live brain isn\'t available in this view, so the prompt lab is asleep. Everything else still works!').then(t=>{ if(t) award('ai-prompt') }) };
+  sprocket($('prompt-out'),`A child wrote these rules for how you should talk: "${rules}". Follow the child's rules as closely as you can while staying kind and safe for an 8-year-old, in 1 to 3 sentences. Then answer their question: ${q}`,'The prompt lab needs the live brain. Everything else still works!').then(t=>{ if(t) award('ai-prompt') }) };
 subTabs($('ai-sub'),b=>{ for(const k of ['snack','words','prompt']) $('ai-'+k).classList.toggle('hidden',b.dataset.ai!==k) });
 
 // ---------- Robot warm-up (from level 1) ----------
@@ -524,9 +589,17 @@ loadLevel(); requestAnimationFrame(placeBot);
 // ---------- Chat ----------
 let turns=[],asking=false;
 const FALLBACK={'What is a variable?':'A variable is a box with a name. You put something in it (like name = "Maya") and use the box later.','What does HTML mean?':'HTML is the language of web pages. It\'s made of tags like <h1> and <p> that tell the browser what to show.','Are you alive?':'Nope! I\'m a computer program. I follow instructions and look for patterns, really fast.','How do you learn?':'People show me lots of examples with the answers, and I look for what they have in common. More good examples, better guesses.','What can I build next?':'Try a guess-the-number game in Python, or a web page about your favorite animal with a magic button.'};
-function addMsg(text,who){ const m=document.createElement('div'); m.className='msg '+who; m.textContent=text; $('log').append(m); m.scrollIntoView({block:'nearest'}); return m }
+function addMsg(text,who){ const r=document.createElement('div'); r.className='row-msg '+who; r.innerHTML=`<div class="av">${who==='bot'?BOT():'🙂'}</div>`; const m=document.createElement('div'); m.className='msg '+who; const w=document.createElement('span'); w.className='nm'; w.textContent=who==='bot'?'Sprocket':'You'; m.append(w);
+  const body=document.createElement('span'); body.className='body'; if(text==='Thinking…') body.innerHTML='<span class="typing"><i></i><i></i><i></i></span>'; else body.textContent=text; m.append(body); r.append(m); $('log').append(r); r.scrollIntoView({block:'nearest',behavior:'smooth'});
+  // the returned object lets the rest of the code set .textContent as before
+  return { set textContent(t){ typeOut(body,t) }, get textContent(){ return body.textContent }, classList:m.classList, set innerHTML(h){ body.innerHTML=h }, append:(...a)=>m.append(...a) } }
+// Reveal text a few characters at a time, like a typing assistant (streaming updates just extend the target)
+const typers=new WeakMap();
+function typeOut(el,target){ let st=typers.get(el); if(!st){ st={shown:0,target:'',timer:null}; typers.set(el,st) } st.target=target; if(!target.startsWith(el.textContent)||el.querySelector('.typing')) { el.textContent=''; st.shown=0 } if(st.timer) return;
+  const step=()=>{ if(st.shown>=st.target.length){ st.timer=null; return } st.shown=Math.min(st.target.length,st.shown+2); el.textContent=st.target.slice(0,st.shown); st.timer=setTimeout(step,18) }; step() }
 async function ask(q){ if(asking||!q.trim()) return; asking=true; $('askbtn').disabled=true; addMsg(q,'me'); const bubble=addMsg('Thinking…','bot'); await aiReady;
-  if(!sampleFn){ await wait(400); bubble.textContent=FALLBACK[q]||'My big brain is off right now, so I can only answer the question buttons above.'; done(); return }
+  if(!sampleFn){ try{ sampleFn = window.claude?.use ? await window.claude.use('sample') : null }catch(e){} }
+  if(!sampleFn){ await wait(400); if(FALLBACK[q]) bubble.textContent=FALLBACK[q]; else await brainOff(bubble,'I can still answer the question buttons above.'); done(); return }
   turns.push({role:'user',content:q});
   try{ const {text}=await sampleFn([{role:'user',content:PERSONA},...turns.slice(-8)],{cache:false,modelTier:'quick',onText:({text})=>{bubble.textContent=text}}); turns.push({role:'assistant',content:text}); award('chat') }
   catch(e){ turns.pop(); if(['not_granted','sampling_disabled','not_declared'].includes(e.code)) sampleFn=null;
@@ -535,7 +608,23 @@ async function ask(q){ if(asking||!q.trim()) return; asking=true; $('askbtn').di
 $('askform').addEventListener('submit',e=>{ e.preventDefault(); const b=$('askbox'); const q=b.value; b.value=''; ask(q) });
 $('quick').addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) ask(b.textContent) });
 paintStars();
+
+// ---------- Pukus Pakus stats ----------
+const TABNAME={robot:'Robot',ai:'AI Lab',py:'Python',html:'Web pages',play:'Playground',chat:'Ask Sprocket',stats:'Stats'};
+const mins=s=>s<60?`${Math.round(s)}s`:`${Math.round(s/60)} min`;
+async function showStats(){ const note=$('stats-note');
+  if(!track.db){ note.textContent='Usage records are only kept when this page is opened inside Claude (signed in). Open it there to see who played and for how long.'; return }
+  note.textContent='Loading…';
+  let docs=[]; try{ const snap=await track.db.collection('sessions').orderBy('started','desc').limit(200).get(); docs=snap.docs.map(d=>d.data()) }catch(e){ note.textContent='Could not read the records right now ('+(e.code||'error')+'). Try Refresh.'; return }
+  const cur={...track.me}; if(!docs.some(d=>d.id===cur.id)) docs.unshift(cur);
+  const byP={}, byT={}; let total=0;
+  for(const d of docs){ const p=d.player||'(no name)'; byP[p]=byP[p]||{sessions:0,seconds:0,runs:0,stars:0,last:0}; byP[p].sessions++; byP[p].seconds+=d.seconds||0; byP[p].runs+=d.runs||0; byP[p].stars=Math.max(byP[p].stars,d.stars||0); byP[p].last=Math.max(byP[p].last,d.started||0); total+=d.seconds||0; for(const t in (d.tabs||{})) byT[t]=(byT[t]||0)+d.tabs[t] }
+  note.textContent=`${docs.length} visit${docs.length===1?'':'s'} recorded, ${mins(total)} in total.`;
+  $('stat-players').innerHTML=Object.entries(byP).sort((a,b)=>b[1].seconds-a[1].seconds).map(([p,v])=>`<div class="stat"><span>${p}</span><b>${mins(v.seconds)}</b><span>${v.sessions} visit${v.sessions===1?'':'s'} · ${v.runs} runs · ★ ${v.stars}<br>last: ${new Date(v.last).toLocaleDateString()}</span></div>`).join('');
+  const mx=Math.max(1,...Object.values(byT)); $('stat-tabs').innerHTML=Object.entries(byT).filter(([t])=>t!=='stats').sort((a,b)=>b[1]-a[1]).map(([t,v])=>`<div><span>${TABNAME[t]||t}</span><i><b style="width:${100*v/mx}%"></b></i><span>${mins(v)}</span></div>`).join('')||'<p>No time recorded yet.</p>';
+  $('stat-sessions').innerHTML='<tr><th>When</th><th>Who</th><th>Device</th><th>Time</th><th>Runs</th><th>Mostly on</th></tr>'+docs.slice(0,40).map(d=>{ const top=Object.entries(d.tabs||{}).filter(([t])=>t!=='stats').sort((a,b)=>b[1]-a[1])[0]; return `<tr><td>${new Date(d.started).toLocaleString([],{dateStyle:'short',timeStyle:'short'})}</td><td>${(d.player||'(no name)').replace(/[<>&]/g,'')}</td><td>${d.device||''}</td><td>${mins(d.seconds||0)}</td><td>${d.runs||0}</td><td>${top?TABNAME[top[0]]+' ('+mins(top[1])+')':''}</td></tr>` }).join('');
+}
+$('stats-refresh').onclick=showStats;
 </script>
 
-</body>
-</html>
+</body></html>
